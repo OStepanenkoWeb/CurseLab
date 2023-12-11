@@ -1,6 +1,6 @@
 import {redirect} from "next/navigation";
 import {auth} from "@clerk/nextjs";
-import {CircleDollarSign, File, LayoutDashboard, ListChecks} from "lucide-react";
+import {BadgeRussianRubleIcon, CircleDollarSign, File, LayoutDashboard, ListChecks} from "lucide-react";
 
 import {db} from "@/lib/db";
 import {IconBadge} from "@/components/IconBadge";
@@ -12,6 +12,7 @@ import {CategoryForm} from "@/app/(dashboard)/(routes)/teacher/courses/[courseId
 import {Attachment, Chapter, Course} from "@prisma/client";
 import PriceForm from "./_components/PriceForm";
 import {AttachmentForm} from "@/app/(dashboard)/(routes)/teacher/courses/[courseId]/_components/AttachmentForm";
+import Actions from "@/app/(dashboard)/(routes)/teacher/courses/[courseId]/_components/Actions";
 
 interface ICourseIdPage {
     params: {
@@ -29,6 +30,18 @@ const Page = async ({ params }:ICourseIdPage) => {
     const course = await db.course.findUnique({
         where: {
             id: params.courseId
+        },
+        include: {
+            chapters: {
+                orderBy: {
+                    position: "asc",
+                },
+            },
+            attachments: {
+                orderBy: {
+                    createdAt: "desc",
+                },
+            }
         }
     }) as Course & { chapters: Chapter[], attachments: Attachment[] }
 
@@ -47,13 +60,16 @@ const Page = async ({ params }:ICourseIdPage) => {
         course.description,
         course.imageUrl,
         course.price,
-        course.categoryId
+        course.categoryId,
+        course.chapters.some(chapter => chapter.isPublished),
     ]
 
     const totalFields = requiredFields.length
     const completedFields = requiredFields.filter(Boolean).length
 
     const completionText = `(${completedFields}/${totalFields})`
+
+    const isComplete = requiredFields.every(Boolean);
 
     return (
         <div className="p-6">
@@ -66,6 +82,11 @@ const Page = async ({ params }:ICourseIdPage) => {
                         Заполните все поля {completedFields}
                     </span>
                 </div>
+                <Actions
+                    disabled={!isComplete}
+                    courseId={params.courseId}
+                    isPublished={course.isPublished}
+                />
             </div>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-16">
                 <div>
@@ -106,9 +127,9 @@ const Page = async ({ params }:ICourseIdPage) => {
                     </div>
                     <div>
                         <div className="flex items-center gap-x-2">
-                            <IconBadge icon={CircleDollarSign}/>
+                            <IconBadge icon={BadgeRussianRubleIcon}/>
                             <h2 className="text-xl">
-                                Предложить свой курс
+                                Стоимость
                             </h2>
                         </div>
                         <PriceForm

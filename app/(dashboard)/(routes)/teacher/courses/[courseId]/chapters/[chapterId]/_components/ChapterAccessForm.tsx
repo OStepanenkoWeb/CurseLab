@@ -1,4 +1,4 @@
-"use client"
+"use client";
 
 import * as z from "zod";
 import axios from "axios";
@@ -8,29 +8,31 @@ import { Pencil } from "lucide-react";
 import { useState } from "react";
 import toast from "react-hot-toast";
 import { useRouter } from "next/navigation";
-import { Course } from "@prisma/client";
+import { Chapter } from "@prisma/client";
 
 import {
     Form,
     FormControl,
+    FormDescription,
     FormField,
     FormItem,
     FormMessage,
 } from "@/components/ui/form";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
-import { Input } from "@/components/ui/input";
-import { formatPrice } from "@/lib/format";
+import {Checkbox} from "@/components/ui/checkbox";
 
-interface IPriceFormProps {
-    initialData: Course;
-}
+interface IChapterAccessFormProps {
+    initialData: Chapter;
+    courseId: string;
+    chapterId: string;
+};
 
 const formSchema = z.object({
-    price: z.coerce.number(),
+    isFree: z.boolean().default(false),
 });
 
-const PriceForm = ({ initialData }: IPriceFormProps) => {
+export const ChapterAccessForm = ({ initialData, courseId, chapterId }: IChapterAccessFormProps) => {
     const [isEditing, setIsEditing] = useState(false);
 
     const toggleEdit = () => setIsEditing((current) => !current);
@@ -40,7 +42,7 @@ const PriceForm = ({ initialData }: IPriceFormProps) => {
     const form = useForm<z.infer<typeof formSchema>>({
         resolver: zodResolver(formSchema),
         defaultValues: {
-            price: initialData?.price || undefined,
+            isFree: !!initialData.isFree
         },
     });
 
@@ -48,8 +50,8 @@ const PriceForm = ({ initialData }: IPriceFormProps) => {
 
     const onSubmit = async (values: z.infer<typeof formSchema>) => {
         try {
-            await axios.patch(`/api/courses/${initialData.id}`, values);
-            toast.success("Стоимость курса обновлена");
+            await axios.patch(`/api/courses/${courseId}/chapters/${chapterId}`, values);
+            toast.success("Доступ к главе обновлен");
             toggleEdit();
             router.refresh();
         } catch {
@@ -60,10 +62,10 @@ const PriceForm = ({ initialData }: IPriceFormProps) => {
     return (
         <div className="mt-6 border bg-slate-100 rounded-md p-4">
             <div className="font-medium flex items-center justify-between">
-                Стоимость курса
+                Доступ к главе
                 <Button onClick={toggleEdit} variant="ghost">
                     {isEditing ? (
-                        <>Отмена</>
+                        <>Закрыть</>
                     ) : (
                         <>
                             <Pencil className="h-4 w-4 mr-2" />
@@ -75,12 +77,13 @@ const PriceForm = ({ initialData }: IPriceFormProps) => {
             {!isEditing && (
                 <p className={cn(
                     "text-sm mt-2",
-                    !initialData.price && "text-slate-500 italic"
+                    !initialData.isFree && "text-slate-500 italic"
                 )}>
-                    {initialData.price
-                        ? formatPrice(initialData.price)
-                        : "Цена отсутствует"
-                    }
+                    {initialData.isFree ? (
+                        <>Эта глава бесплатна для предварительного просмотра.</>
+                    ) : (
+                        <>Эта глава не бесплатна.</>
+                    )}
                 </p>
             )}
             {isEditing && (
@@ -91,19 +94,20 @@ const PriceForm = ({ initialData }: IPriceFormProps) => {
                     >
                         <FormField
                             control={form.control}
-                            name="price"
+                            name="isFree"
                             render={({ field }) => (
-                                <FormItem>
+                                <FormItem className="flex flex-row items-start space-x-3 space-y-0 rounded-md border p-4">
                                     <FormControl>
-                                        <Input
-                                            type="number"
-                                            step="0.01"
-                                            disabled={isSubmitting}
-                                            placeholder="Укажите стоимость вашего курса"
-                                            {...field}
+                                        <Checkbox
+                                            checked={field.value}
+                                            onCheckedChange={field.onChange}
                                         />
                                     </FormControl>
-                                    <FormMessage />
+                                    <div className="space-y-1 leading-none">
+                                        <FormDescription>
+                                            Установите этот флажок, если хотите сделать эту главу бесплатной для предварительного просмотра.
+                                        </FormDescription>
+                                    </div>
                                 </FormItem>
                             )}
                         />
@@ -121,5 +125,3 @@ const PriceForm = ({ initialData }: IPriceFormProps) => {
         </div>
     )
 }
-
-export default PriceForm

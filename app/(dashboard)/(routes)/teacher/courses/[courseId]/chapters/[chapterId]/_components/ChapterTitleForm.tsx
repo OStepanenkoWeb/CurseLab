@@ -1,4 +1,4 @@
-"use client"
+"use client";
 
 import * as z from "zod";
 import axios from "axios";
@@ -8,7 +8,6 @@ import { Pencil } from "lucide-react";
 import { useState } from "react";
 import toast from "react-hot-toast";
 import { useRouter } from "next/navigation";
-import { Course } from "@prisma/client";
 
 import {
     Form,
@@ -17,20 +16,22 @@ import {
     FormItem,
     FormMessage,
 } from "@/components/ui/form";
-import { Button } from "@/components/ui/button";
-import { cn } from "@/lib/utils";
 import { Input } from "@/components/ui/input";
-import { formatPrice } from "@/lib/format";
+import { Button } from "@/components/ui/button";
 
-interface IPriceFormProps {
-    initialData: Course;
-}
+interface IChapterTitleFormProps {
+    initialData: {
+        title: string;
+    };
+    courseId: string;
+    chapterId: string;
+};
 
 const formSchema = z.object({
-    price: z.coerce.number(),
+    title: z.string().min(1),
 });
 
-const PriceForm = ({ initialData }: IPriceFormProps) => {
+export const ChapterTitleForm = ({ initialData, courseId, chapterId }: IChapterTitleFormProps) => {
     const [isEditing, setIsEditing] = useState(false);
 
     const toggleEdit = () => setIsEditing((current) => !current);
@@ -39,17 +40,15 @@ const PriceForm = ({ initialData }: IPriceFormProps) => {
 
     const form = useForm<z.infer<typeof formSchema>>({
         resolver: zodResolver(formSchema),
-        defaultValues: {
-            price: initialData?.price || undefined,
-        },
+        defaultValues: initialData,
     });
 
     const { isSubmitting, isValid } = form.formState;
 
     const onSubmit = async (values: z.infer<typeof formSchema>) => {
         try {
-            await axios.patch(`/api/courses/${initialData.id}`, values);
-            toast.success("Стоимость курса обновлена");
+            await axios.patch(`/api/courses/${courseId}/chapters/${chapterId}`, values);
+            toast.success("Название главы обновлено");
             toggleEdit();
             router.refresh();
         } catch {
@@ -60,10 +59,10 @@ const PriceForm = ({ initialData }: IPriceFormProps) => {
     return (
         <div className="mt-6 border bg-slate-100 rounded-md p-4">
             <div className="font-medium flex items-center justify-between">
-                Стоимость курса
+                Заголовок главы
                 <Button onClick={toggleEdit} variant="ghost">
                     {isEditing ? (
-                        <>Отмена</>
+                        <>Закрыть</>
                     ) : (
                         <>
                             <Pencil className="h-4 w-4 mr-2" />
@@ -73,14 +72,8 @@ const PriceForm = ({ initialData }: IPriceFormProps) => {
                 </Button>
             </div>
             {!isEditing && (
-                <p className={cn(
-                    "text-sm mt-2",
-                    !initialData.price && "text-slate-500 italic"
-                )}>
-                    {initialData.price
-                        ? formatPrice(initialData.price)
-                        : "Цена отсутствует"
-                    }
+                <p className="text-sm mt-2">
+                    {initialData.title}
                 </p>
             )}
             {isEditing && (
@@ -91,15 +84,13 @@ const PriceForm = ({ initialData }: IPriceFormProps) => {
                     >
                         <FormField
                             control={form.control}
-                            name="price"
+                            name="title"
                             render={({ field }) => (
                                 <FormItem>
                                     <FormControl>
                                         <Input
-                                            type="number"
-                                            step="0.01"
                                             disabled={isSubmitting}
-                                            placeholder="Укажите стоимость вашего курса"
+                                            placeholder="Введение в курс'"
                                             {...field}
                                         />
                                     </FormControl>
@@ -121,5 +112,3 @@ const PriceForm = ({ initialData }: IPriceFormProps) => {
         </div>
     )
 }
-
-export default PriceForm

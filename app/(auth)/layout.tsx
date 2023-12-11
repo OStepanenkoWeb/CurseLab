@@ -2,7 +2,7 @@ import React from 'react';
 
 const AuthLayout = ({
                         children
-                    }): JSX.Element => {
+                    }: { children: React.ReactNode }) => {
                     return (
                         <div className='h-full flex items-center justify-center'>
                             {children}
