@@ -11,13 +11,16 @@ interface IFileUploadProps {
 }
 
 const FileUpload = ({ onChange, endpoint }: IFileUploadProps) => {
+	const onClientUploadComplete = (res: { url: string | undefined }[]) => {
+		console.log('tyuiyiyu', res)
+		onChange(res?.[0].url)
+	}
+
 	return (
 		<UploadDropzone
 			content={{label: 'Выберите или перетащите файл', allowedContent: 'изображение 4Mб'}}
 			endpoint={endpoint}
-			onClientUploadComplete={(res) => {
-				onChange(res?.[0].url)
-			}}
+			onClientUploadComplete={onClientUploadComplete}
 			onUploadError={(error: Error) => {
 				toast.error(`${error?.message}`)
 			}}

@@ -20,7 +20,7 @@ export async function POST(req: Request) {
         })
 
         return new NextResponse(
-            JSON.stringify({course}),
+            JSON.stringify(course),
             { status: 200, headers: { 'content-type': 'application/json' } }
         )
     } catch (error) {

@@ -7,16 +7,20 @@ const f = createUploadthing();
 
 const handleAuth = () => {
     const { userId } = auth();
-    const isAuthorized = isTeacher(userId);
+    // const isAuthorized = isTeacher(userId);
 
-    if (!userId || !isAuthorized) throw new Error("Unauthorized");
+    // if (!userId || !isAuthorized) throw new Error("Unauthorized");
+    console.log('handleAuth')
+    if (!userId) throw new Error("Unauthorized");
     return { userId };
 }
 
 export const ourFileRouter = {
     courseImage: f({ image: { maxFileSize: "4MB", maxFileCount: 1 } })
         .middleware(() => handleAuth())
-        .onUploadComplete(() => {}),
+        .onUploadComplete(() => {
+            console.log('onUploadComplete')
+        }),
     courseAttachment: f(["text", "image", "video", "audio", "pdf"])
         .middleware(() => handleAuth())
         .onUploadComplete(() => {}),
