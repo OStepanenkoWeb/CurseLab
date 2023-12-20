@@ -12,6 +12,7 @@ import Image from "next/image";
 
 import { Button } from "@/components/ui/button";
 import FileUpload from "@/components/FileUpload";
+import ReactPlayer from "react-player";
 
 interface IChapterVideoFormProps {
     initialData: Chapter & { muxData?: MuxData | null };
@@ -70,9 +71,10 @@ const ChapterVideoForm = ({ initialData, courseId, chapterId }: IChapterVideoFor
                     </div>
                 ) : (
                     <div className="relative aspect-video mt-2">
-                        <MuxPlayer
-                            playbackId={initialData?.muxData?.playbackId || ""}
-                        />
+                        <ReactPlayer url={initialData?.videoUrl}/>
+                        {/*<MuxPlayer*/}
+                        {/*    playbackId={initialData?.muxData?.playbackId || ""}*/}
+                        {/*/>*/}
                     </div>
                 )
             )}
@@ -82,6 +84,7 @@ const ChapterVideoForm = ({ initialData, courseId, chapterId }: IChapterVideoFor
                         endpoint="chapterVideo"
                         onChange={(url) => {
                             if (url) {
+                                console.log(url)
                                 onSubmit({ videoUrl: url });
                             }
                         }}

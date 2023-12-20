@@ -7,9 +7,9 @@ const f = createUploadthing();
 
 const handleAuth = () => {
     const { userId } = auth();
-    // const isAuthorized = isTeacher(userId);
+    const isAuthorized = isTeacher(userId);
 
-    // if (!userId || !isAuthorized) throw new Error("Unauthorized");
+    if (!userId || !isAuthorized) throw new Error("Unauthorized");
     console.log('handleAuth')
     if (!userId) throw new Error("Unauthorized");
     return { userId };
@@ -24,7 +24,7 @@ export const ourFileRouter = {
     courseAttachment: f(["text", "image", "video", "audio", "pdf"])
         .middleware(() => handleAuth())
         .onUploadComplete(() => {}),
-    chapterVideo: f({ video: { maxFileCount: 1, maxFileSize: "512GB" } })
+    chapterVideo: f({ video: { maxFileCount: 1, maxFileSize: "1GB" } })
         .middleware(() => handleAuth())
         .onUploadComplete(() => {})
 }

@@ -25,7 +25,7 @@ const ConfirmModal = ({ children, onConfirm }: IConfirmModalProps) => {
             </AlertDialogTrigger>
             <AlertDialogContent>
                 <AlertDialogHeader>
-                    <AlertDialogTitle>Are you sure?</AlertDialogTitle>
+                    <AlertDialogTitle>Вы уверены?</AlertDialogTitle>
                     <AlertDialogDescription>
                         Это действие не может быть отменено.
                     </AlertDialogDescription>
@@ -33,7 +33,7 @@ const ConfirmModal = ({ children, onConfirm }: IConfirmModalProps) => {
                 <AlertDialogFooter>
                     <AlertDialogCancel>Cancel</AlertDialogCancel>
                     <AlertDialogAction onClick={onConfirm}>
-                        Далее
+                        Применить
                     </AlertDialogAction>
                 </AlertDialogFooter>
             </AlertDialogContent>
